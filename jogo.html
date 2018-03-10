@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <meta charset="UTF-8">
+<title> Título </title>
+</head>
+<body>
+<table border='1px'><tr><td><canvas id="canvas1" width="100" height="100" style="border:1px solid #d3d3d3;" onclick="recebe('1');" ></canvas>
+</td><td><canvas id="canvas2" width="100" height="100" style="border:1px solid #d3d3d3;" onclick="recebe(2);"></canvas>
+</td><td><canvas id="canvas3" width="100" height="100" style="border:1px solid #d3d3d3;" onclick="recebe(3);"></canvas>
+</td></tr><tr><td><canvas id="canvas4" width="100" height="100" style="border:1px solid #d3d3d3;" onclick="recebe(4);"></canvas>
+</td><td><canvas id="canvas5" width="100" height="100" style="border:1px solid #d3d3d3;" onclick="recebe(5);"></canvas>
+</td><td><canvas id="canvas6" width="100" height="100" style="border:1px solid #d3d3d3;" onclick="recebe(6);"></canvas>
+</td></tr><tr><td><canvas id="canvas7" width="100" height="100" style="border:1px solid #d3d3d3;" onclick="recebe(7);"></canvas>
+</td><td><canvas id="canvas8" width="100" height="100" style="border:1px solid #d3d3d3;" onclick="recebe(8);"></canvas>
+</td><td><canvas id="canvas9" width="100" height="100" style="border:1px solid #d3d3d3;" onclick="recebe(9);"></canvas>
+</td></tr></table>
+<script>
+
+var i = 0;
+var player = 'X';
+var ganhador = '';
+var canvasArray = ['1','2','3','4','5','6','7','8','9'];
+function recebe(numcan){
+
+//document.getElementById('a').innerHTML = "recebi" + numcan;
+if(canvasArray[numcan - 1] != 'X' && canvasArray[numcan - 1] != 'O' && ganhador == ''){
+i++;
+var ctx = document.getElementById('canvas'+numcan).getContext('2d');
+
+ctx.beginPath();
+ctx.lineWidth = 8;
+ctx.lineCap="rounded";
+if(player == 'O'){
+ctx.arc(50,50,40,0,2 * Math.PI);
+ctx.strokeStyle = "red";
+}if(player == 'X'){
+ctx.strokeStyle = "black";
+ctx.moveTo(0,0);
+ctx.lineTo(100,100);
+ctx.moveTo(100,0);
+ctx.lineTo(0,100);
+}
+ctx.stroke();
+
+canvasArray[numcan - 1] = player;
+
+if((canvasArray[0] == canvasArray[1] && canvasArray[1] == canvasArray[2]) || (canvasArray[3] == canvasArray[4] && canvasArray[4] == canvasArray[5]) || (canvasArray[6] == canvasArray[7] && canvasArray[7] == canvasArray[8]) || (canvasArray[0] == canvasArray[3] && canvasArray[3] == canvasArray[6]) || (canvasArray[1] == canvasArray[4] && canvasArray[4] == canvasArray[7]) || (canvasArray[2] == canvasArray[5] && canvasArray[5] == canvasArray[8]) || (canvasArray[0] == canvasArray[4] && canvasArray[4] == canvasArray[8]) || (canvasArray[2] == canvasArray[4] && canvasArray[4] == canvasArray[6]))
+{
+ganhador = player;
+document.getElementById('a').innerHTML = " '" + ganhador + "' ganhou!! F5 para recomeçar.";
+return;
+}
+
+if(player == 'X'){trocaplayer('O');}else{trocaplayer('X');}
+
+}
+}
+
+function trocaplayer(tplayer)
+{
+   player = tplayer;
+   
+} 
+</script> 
+<button type="button" onclick="trocaplayer('X');">X</button>
+<button type="button" onclick="trocaplayer('O');">O</button> 
+<a id="a"></a>
+</body>
+</html>

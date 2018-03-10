@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<style>
+body{ background-color: grey }
+
+
+
+</style>
+<title>tetrisss</title>
+</head>
+<body>
+
+<canvas class="w3-left" id="Canvas" width="500" height="600" style="border:4px solid #000000; background-color:blue; margin: 0px;padding:0px;border-right:0px;">
+</canvas><div class="w3-left" style="background-color: maroon;width:219px;height:608px;border:4px solid #000000;; margin: 0px;padding:0px;border-left:4px solid black">
+
+<div class="w3-container" style="width:100%;"> 
+
+
+
+<form action="" style="font-size:11px;color:white;" class="">
+
+<div style="font-size:14px;"><b> Escolha um tamanho e um modo de jogo:</b><br></div></br>
+
+	<input id="Pequeno" type="radio" name="gender" checked> Pequeno <input id="Médio" type="radio" name="gender" value="female"> Médio <input id="Grande" type="radio" name="gender" > Grande<br><br>
+	<input id="Colorido" type="radio" name="modo" checked> Colorido <input id="PB" type="radio" name="modo"> P & B <input id="Normal" type="radio" name="modo"> Normal<br><br>
+
+</form> 
+
+</div>
+
+<button class="w3-button w3-purple" style="border-bottom: 1px solid black;border-top: 1px solid black;width:100%;border-color:black;" onclick="startGame();this.remove();"><b>Play</b></button>
+
+<div class="w3-container" style="color:#CCCCCC">
+<br><li><b> Colorido </b></li> Neste modo quanto mais cores tiver a linha eliminada mais pontos você ganha.  
+<br><li><b> P & B </b></li> Neste as peças tem apenas duas cores e o desafio é montar linhas de uma cor só.
+<br><li><b> Normal </b></li> Este é o modo clássico, apenas sobreviva.
+<br><br>Controles
+<br> <a style="font-size:12px"> A - Esquerda D - Direita <br> W - Girar Enter - Pause <a/>
+</div>
+
+
+</div>
+
+<button onclick="startGame();this.remove();">Play</button>
+<button onclick="caiBlocos();attPos();">c</button>
+<button onclick="limpaLinhas([3]);">cac</button>
+<button onclick="giraObj();">a</button>	
+
+</div>
+
+<script>
+	
+function GetCheck(id){
+
+return document.getElementById(id).checked;
+
+}
+
+Blocos = new Array();
+
+function startGame(){
+
+if(GetCheck('Pequeno')) attTaxa(20);
+if(GetCheck('Médio')) attTaxa(30); 
+if(GetCheck('Grande')) attTaxa(60);
+if(GetCheck('Colorido')) Modo = 1;
+if(GetCheck('PB')) Modo = 2;
+if(GetCheck('Normal')) Modo = 3;
+
+Ptimer = setInterval(playTimer,200);
+
+
+}
+
+function playTimer(){
+
+var randObj = Math.floor(Math.random() * 6);
+
+caiBlocos();
+
+attPos();
+
+for (var bloco of Blocos){
+
+if(bloco.cai){return;}
+
+}
+
+criaObjeto(objMaps[randObj]);
+
+}
+
+c = document.getElementById("Canvas");
+
+function attPos(){
+
+
+var ctx = c.getContext("2d");
+
+ctx.clearRect(0, 0, TamanhoX, TamanhoY);
+ctx.strokeStyle="#000000";
+
+for(var bloco of Blocos){
+
+var PosX = bloco.x * TaxaDim;
+var PosY = bloco.y * TaxaDim;
+
+ctx.fillStyle = bloco.cor;
+
+ctx.fillRect(PosX, PosY, TaxaDim, TaxaDim);
+ctx.strokeRect(PosX, PosY, TaxaDim, TaxaDim);
+
+}
+
+}
+
+function Bloco(x,y,status,cor){
+
+this.x = x;
+this.y = y;
+this.ctrl = true;
+this.cai = status;
+this.cor = cor;
+this.noChao = function(){
+if(this.y >= Ymax){return true;}else{return false;}
+}
+this.encostado = function(direc){
+
+for (var bloco of Blocos){
+
+switch (direc){
+
+case 'y+': if(!bloco.cai && bloco.x == this.x && bloco.y == this.y + 1){return true;}break;
+case 'x+': if(!bloco.cai && bloco.y == this.y && bloco.x == this.x + 1 || (this.x == Xmax)){return true;}break;
+case 'x-': if(!bloco.cai && bloco.y == this.y && bloco.x == this.x - 1 || (this.x == Xmin)){return true;}break;
+
+}
+
+}
+return false;
+} 
+
+}
+
+function caiBlocos(){
+
+for(var bloco of Blocos){
+
+if(bloco.cai && (bloco.noChao() || bloco.encostado('y+'))){
+
+soltaBlocos();verifLinha();return;
+
+}
+
+}
+
+for(var bloco of Blocos){
+
+if(bloco.cai){
+bloco.y++;}
+
+}
+
+}
+
+function soltaBlocos(){
+
+var count;
+
+for(var bloco of Blocos){
+
+if(bloco.cai){
+
+bloco.cai = false;
+bloco.ctrl = false;
+count++;
+
+}
+
+}
+
+return count;
+
+}
+
+function Objeto(objMap){
+
+var cores = new Array();
+
+this.blocos = new Array();
+
+cores.push('aqua');
+cores.push('magenta');
+cores.push('lime');
+cores.push('blueviolet');
+cores.push('yellow');
+cores.push('firebrick'); 
+cores.push('orange');
+
+this.cor = cores[Math.floor(Math.random() * 7)];
+for(var bloco of objMap){
+
+if(typeof (bloco) != 'undefined'){
+
+this.blocos.push(bloco);
+
+}
+
+}
+
+}
+
+function criaObjeto(objMap){
+
+var Obj = new Objeto(objMap);
+
+entraObjeto(Obj);
+
+}
+
+function entraObjeto(Obj){
+
+for(var bloco of Obj.blocos){
+
+blc = new Bloco(bloco.x,bloco.y,true,Obj.cor);
+
+Blocos.push(blc)
+
+}
+
+}
+
+function verifLinha(){
+
+Blocos.sort(function(a, b){return b.y - a.y});
+
+var y = -1;
+var count = 0;
+var linhasCompletas = new Array();
+
+for(var bloco of Blocos){
+
+if(!bloco.cai)
+{
+
+if(y == bloco.y)count++;
+if(y != bloco.y)count = 0;
+
+}
+
+y = bloco.y;
+
+if(count == Xmax){linhasCompletas.push(y);  }
+
+}
+
+if(linhasCompletas.length > 0){limpaLinhas(linhasCompletas);}
+
+}
+
+function limpaLinhas(linhasArray){
+
+linhasArray.sort(function(a, b){return b - a});
+
+for(var linha of linhasArray){
+
+for(var i = Blocos.length; i > 0 ; i--){
+
+bloco = Blocos[i - 1];
+
+if(!bloco.cai && bloco.y == linha){
+
+Blocos.splice(i - 1,1);
+
+}
+
+}
+
+}
+
+for(bloco of Blocos){
+
+if(!bloco.cai && bloco.y < linhasArray[0]){
+
+bloco.cai = true;
+
+}
+
+}
+
+caiBlocos();
+caiBlocos();
+
+if(linhasArray.length > 1 && linhasArray[1] == linhasArray[0] - 2){
+
+for(bloco of Blocos){
+
+if(bloco.y <= linhasArray[1]){ bloco.cai = true;}
+
+}
+
+}
+
+attPos();
+
+}
+
+document.onkeyup = function(evt) {
+    
+	evt = evt || window.event;
+    var charCode = evt.keyCode || evt.which;
+    
+	const key = evt.key; 
+	
+	if(key == 'a'|| key == 'A'){
+	
+	MoveObj('x-');	
+	
+	}
+	if(key == 'd'|| key == 'D'){
+	
+	MoveObj('x+');	
+	
+	}
+	if(key == 's'|| key == 'S'){
+	
+	MoveObj('y+');	
+	
+	}
+	if(key == 'W'|| key == 'w'){
+	
+	giraObj();	
+	
+	}
+	if(key == 'Enter'){
+	
+	clearInterval(Ptimer);	
+	
+	}
+	
+	};
+
+function MoveObj(sentido){
+	
+	
+	
+	for(var bloco of Blocos){
+	
+	if(bloco.ctrl && (bloco.encostado(sentido) || ((sentido == 'y+') && (bloco.noChao())))){return;}
+	
+	}
+	
+	for(var bloco of Blocos){
+	
+	if(bloco.cai && bloco.ctrl == true){
+	
+	if(sentido == 'x-')bloco.x--;
+	if(sentido == 'x+')bloco.x++;
+	if(sentido == 'y+')bloco.y++;
+	
+	}
+
+}
+	attPos();
+}
+
+
+
+function giraObj(){
+
+var centro = {};
+var i = 0;
+
+
+for(var bloco of Blocos){
+
+if(bloco.ctrl){
+
+if(i == 0){
+
+centro.x = bloco.x;
+centro.y = bloco.y;
+i = 1;
+
+if(verifRedor(bloco)) return;
+
+}
+else{
+
+if(bloco.x == centro.x){
+
+if(bloco.y == centro.y + 1){ PorBloco(--bloco.y,++bloco.x,bloco); }else
+if(bloco.y == centro.y - 1){ PorBloco(++bloco.y,--bloco.x,bloco); }
+
+}else
+
+if(bloco.x == centro.x - 1){
+
+if(bloco.y == centro.y - 1){ PorBloco(bloco.y + 2,bloco.x,bloco); }else
+if(bloco.y == centro.y){ PorBloco(bloco.y + 1,bloco.x + 1,bloco); }else
+if(bloco.y == centro.y + 1){ PorBloco(bloco.y,bloco.x + 2,bloco); }
+
+}else
+
+if(bloco.x == centro.x + 1){
+
+if(bloco.y == centro.y - 1){ PorBloco(bloco.y,bloco.x - 2,bloco); }else
+if(bloco.y == centro.y){ PorBloco(bloco.y - 1,bloco.x - 1,bloco); }else
+if(bloco.y == centro.y + 1){ PorBloco(bloco.y - 2,bloco.x,bloco); }
+
+}
+
+}
+
+}
+
+}
+
+attPos();
+
+}
+
+function verifRedor(blc){
+
+if((blc.x - 1 < Xmin) || (blc.x + 1 > Xmax) || (blc.y + 1 >= Ymax) ){return true;}
+
+for(var bloco of Blocos){
+
+if((!bloco.ctrl) && ((bloco.x == blc.x && bloco.y == blc.y + 1) || (bloco.x == blc.x && bloco.y == blc.y - 1) ||(bloco.x == blc.x + 1 && bloco.y == blc.y) || (bloco.x == blc.x + 1 && bloco.y == blc.y + 1) || (bloco.x == blc.x + 1 && bloco.y == blc.y - 1) || (bloco.x == blc.x - 1 && bloco.y == blc.y - 1) || (bloco.x == blc.x - 1 && bloco.y == blc.y) || (bloco.x == blc.x - 1 && bloco.y == blc.y + 1))) 
+return true;
+
+}
+
+}
+
+function PorBloco(Ynovo,Xnovo,Tbloco){
+
+for(var bloco of Blocos){
+
+if( (!bloco.ctrl && !bloco.cai && bloco.y == Ynovo && bloco.x == Xnovo) ){
+
+return true;
+
+}
+
+}
+
+Tbloco.y = Ynovo;
+Tbloco.x = Xnovo;
+
+}
+
+var objMaps = new Array(10)
+
+for (i=0; i <10; i++){
+    objMaps[i]=new Array(9);
+}
+
+c.width = TamanhoX = 360; c.height = TamanhoY = 600;
+
+//20/30/60
+TaxaDim = 60;
+Ymax = (TamanhoY/TaxaDim).toFixed(0) - 1; Ymin = 0;
+Xmax = (TamanhoX/TaxaDim).toFixed(0) - 1; Xmin = 0;
+
+Xinic = (Xmax + 1) / 2; Yinic = 0;
+
+function attTaxa(taxa){
+
+TaxaDim = taxa;
+
+Ymax = (TamanhoY/TaxaDim).toFixed(0) - 1;
+Xmax = (TamanhoX/TaxaDim).toFixed(0) - 1;
+
+Xinic = (Xmax + 1) / 2; Yinic = 0;
+
+}
+
+// --'
+objMaps[0][0] = {};
+objMaps[0][0].x = Xinic;
+objMaps[0][0].y = Yinic;
+objMaps[0][1] = {};
+objMaps[0][1].x = objMaps[0][0].x - 1;
+objMaps[0][1].y = objMaps[0][0].y;
+objMaps[0][2] = {};
+objMaps[0][2].x = objMaps[0][1].x + 2;
+objMaps[0][2].y = objMaps[0][1].y;
+objMaps[0][3] = {};
+objMaps[0][3].x = objMaps[0][2].x;
+objMaps[0][3].y = objMaps[0][2].y - 1;
+
+// ---
+objMaps[1][0] = {};
+objMaps[1][0].x = Xinic;
+objMaps[1][0].y = Yinic;
+objMaps[1][1] = {};
+objMaps[1][1].x = objMaps[1][0].x - 1;
+objMaps[1][1].y = objMaps[1][0].y;
+objMaps[1][2] = {};
+objMaps[1][2].x = objMaps[1][1].x + 2;
+objMaps[1][2].y = objMaps[1][1].y;
+
+// --¬ 
+objMaps[2][0] = {};
+objMaps[2][0].x = Xinic;
+objMaps[2][0].y = Yinic;
+objMaps[2][1] = {};
+objMaps[2][1].x = objMaps[2][0].x - 1;
+objMaps[2][1].y = objMaps[2][0].y;
+objMaps[2][2] = {};
+objMaps[2][2].x = objMaps[2][1].x + 2;
+objMaps[2][2].y = objMaps[2][1].y;
+objMaps[2][3] = {};
+objMaps[2][3].x = objMaps[2][2].x;
+objMaps[2][3].y = objMaps[2][2].y + 1;
+
+// -'-
+objMaps[3][0] = {};
+objMaps[3][0].x = Xinic;
+objMaps[3][0].y = Yinic;
+objMaps[3][1] = {};
+objMaps[3][1].x = objMaps[3][0].x - 1;
+objMaps[3][1].y = objMaps[3][0].y;
+objMaps[3][2] = {};
+objMaps[3][2].x = objMaps[3][1].x + 2;
+objMaps[3][2].y = objMaps[3][1].y;
+objMaps[3][3] = {};
+objMaps[3][3].x = objMaps[3][2].x - 1;
+objMaps[3][3].y = objMaps[3][2].y + 1;
+
+// '='
+objMaps[4][0] = {};
+objMaps[4][0].x = Xinic;
+objMaps[4][0].y = Yinic;
+objMaps[4][1] = {};
+objMaps[4][1].x = objMaps[4][0].x - 1;
+objMaps[4][1].y = objMaps[4][0].y;
+objMaps[4][2] = {};
+objMaps[4][2].x = objMaps[4][1].x;
+objMaps[4][2].y = objMaps[4][1].y + 1;
+objMaps[4][3] = {};
+objMaps[4][3].x = objMaps[4][2].x + 1;
+objMaps[4][3].y = objMaps[4][2].y;
+
+// Z
+objMaps[5][0] = {};
+objMaps[5][0].x = Xinic;
+objMaps[5][0].y = Yinic;
+objMaps[5][1] = {};
+objMaps[5][1].x = objMaps[5][0].x;
+objMaps[5][1].y = objMaps[5][0].y - 1;
+objMaps[5][2] = {};
+objMaps[5][2].x = objMaps[5][1].x - 1;
+objMaps[5][2].y = objMaps[5][1].y + 1;
+objMaps[5][3] = {};
+objMaps[5][3].x = objMaps[5][2].x;
+objMaps[5][3].y = objMaps[5][2].y + 1;
+
+// Blocos que não tem no jogo original
+
+objMaps[6][0] = {};
+objMaps[6][0].x = Xinic;
+objMaps[6][0].y = Yinic;
+objMaps[6][1] = {};
+objMaps[6][1].x = objMaps[6][0].x + 1;
+objMaps[6][1].y = objMaps[6][0].y;
+objMaps[6][2] = {};
+objMaps[6][2].x = objMaps[6][1].x;
+objMaps[6][2].y = objMaps[6][1].y + 1;
+objMaps[6][3] = {};
+objMaps[6][3].x = objMaps[6][2].x - 2;
+objMaps[6][3].y = objMaps[6][2].y;
+objMaps[6][4] = {};
+objMaps[6][4].x = objMaps[6][3].x;
+objMaps[6][4].y = objMaps[6][3].y - 1;
+
+objMaps[7][0] = {};
+objMaps[7][0].x = Xinic;
+objMaps[7][0].y = Yinic;
+objMaps[7][1] = {};
+objMaps[7][1].x = objMaps[7][0].x + 1;
+objMaps[7][1].y = objMaps[7][0].y;
+objMaps[7][2] = {};
+objMaps[7][2].x = objMaps[7][1].x;
+objMaps[7][2].y = objMaps[7][1].y - 1;
+objMaps[7][3] = {};
+objMaps[7][3].x = objMaps[7][2].x - 2;
+objMaps[7][3].y = objMaps[7][2].y + 1;
+objMaps[7][4] = {};
+objMaps[7][4].x = objMaps[7][3].x;
+objMaps[7][4].y = objMaps[7][3].y + 1;
+
+objMaps[8][0] = {};
+objMaps[8][0].x = Xinic;
+objMaps[8][0].y = Yinic;
+objMaps[8][1] = {};
+objMaps[8][1].x = objMaps[8][0].x + 1;
+objMaps[8][1].y = objMaps[8][0].y;
+objMaps[8][2] = {};
+objMaps[8][2].x = objMaps[8][1].x;
+objMaps[8][2].y = objMaps[8][1].y - 1;
+objMaps[8][3] = {};
+objMaps[8][3].x = objMaps[8][2].x - 2;
+objMaps[8][3].y = objMaps[8][2].y + 1;
+objMaps[8][4] = {};
+objMaps[8][4].x = objMaps[8][3].x + 2;
+objMaps[8][4].y = objMaps[8][3].y + 1;
+
+
+
+
+</script>
+
+
+</body>
+</html>
